@@ -14,7 +14,7 @@ public class HelloRequest {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append( "HellowRequest.name:").append( name );
+		sb.append( "Hello Request.name:[").append( name ).append( "]").append( name.length() );
 		return sb.toString();
 	}
 }

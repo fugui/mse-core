@@ -8,6 +8,7 @@ import io.vertx.core.http.HttpServerOptions;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.net.URL;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.protobuf.ProtobufMapper;
@@ -47,7 +48,9 @@ public class App {
 				
 				ObjectMapper mapper = new ProtobufMapper();
 				try {
-					ProtobufSchema schema = ProtobufSchemaLoader.std.load( App.class.getResource( "message.proto" ) );
+					String proto = "message HelloRequest {\n optional string name = 1; \n }\n" ;
+				
+					ProtobufSchema schema = ProtobufSchemaLoader.std.parse( proto );
 					
 					HelloRequest empl = mapper.readerFor(HelloRequest.class)
 							   .with(schema)
