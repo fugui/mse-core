@@ -44,7 +44,9 @@ public class App {
 				sb.append( "Body received: ").append( buffer.length() ).append( "<BR>\r\n" );
 
 				byte [] data = buffer.getBytes( 5 , buffer.length() );
-				sb.append( "Data:" ).append( data.length ).append( "<BR>\r\n" );
+				sb.append( "Data:" ).append( buffer.getByte(0) ).append( " ")
+					.append( buffer.getUnsignedInt(1)) .append(" ")
+					.append( data.length ).append( "<BR>\r\n" );
 				
 				ObjectMapper mapper = new ProtobufMapper();
 				try {
