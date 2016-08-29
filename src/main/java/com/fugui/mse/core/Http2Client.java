@@ -19,22 +19,12 @@ import io.vertx.core.http.HttpVersion;
 public class Http2Client {
 
 	public static void main(String[] args) {
-
-/*
-:=<BR>
-:=<BR>
-
-Body received: 19<BR>
-Data:0 14 14<BR>
-Hello Request.name:[I Love China]12
- * 
- * 		
- */
 		
 		Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(40));
 		HttpClient client = vertx.createHttpClient(
 				new HttpClientOptions().setProtocolVersion(HttpVersion.HTTP_2).setHttp2ClearTextUpgrade(false));
 		
+		System.out.println( "Started client. ");
 		HttpClientRequest request = client.post( 8080, "localhost", "/helloworld.Greeter/SayHello", response-> {
 			System.out.println("Received response for service1 " + response.statusCode() );
 			response.bodyHandler( buffer -> {
@@ -44,16 +34,14 @@ Hello Request.name:[I Love China]12
 			});
 		});
  
+		request.setChunked(true);
 		request.putHeader( ":method"  , "POST" );
 		request.putHeader( ":scheme", "http");
 		request.putHeader( ":path", "/helloworld.Greeter/SayHello");
 		request.putHeader( ":authority", "localhost");
 		request.putHeader( "content-type", "application/grpc");
-		request.putHeader( "user-agent", "grpc-go/1.0");
+		request.putHeader( "user-agent", "grpc-mse/1.0");
 		request.putHeader( "te", "trailers");
-		
-		Buffer buffer = Buffer.buffer();
-		buffer.appendByte( (byte)0 );
 		
 		ObjectMapper mapper = new ProtobufMapper();
 		try {
@@ -66,14 +54,19 @@ Hello Request.name:[I Love China]12
 			
 			byte[] data = mapper.writer(schema).writeValueAsBytes(hr);
 
+			// request.putHeader("content-length", String.valueOf( 5+data.length )  );
+			
+			Buffer buffer = Buffer.buffer();
+			buffer.appendByte( (byte)0 );
 			buffer.appendUnsignedInt( data.length );
 			buffer.appendBytes( data );
+			request.write( buffer );	
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		request.write( buffer );		
+	
 		request.end();
 	
 	}
