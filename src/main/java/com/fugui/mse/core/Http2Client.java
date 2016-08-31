@@ -1,12 +1,14 @@
 package com.fugui.mse.core;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.protobuf.ProtobufMapper;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchema;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchemaLoader;
 
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
@@ -25,11 +27,25 @@ public class Http2Client {
 				new HttpClientOptions().setProtocolVersion(HttpVersion.HTTP_2).setHttp2ClearTextUpgrade(false));
 		
 		System.out.println( "Started client. ");
-		HttpClientRequest request = client.post( 8080, "localhost", "/helloworld.Greeter/SayHello", response-> {
+		HttpClientRequest request = client.post( 50051, "localhost", "/helloworld.Greeter/SayHello", response-> {
 			System.out.println("Received response for service1 " + response.statusCode() );
 			response.bodyHandler( buffer -> {
-				System.out.println( buffer.toString() );
+				StringBuilder sb = new StringBuilder();
+				MultiMap headers = response.headers();
+				for( Map.Entry<String,String> entry : headers )
+				{
+					sb.append( entry.getKey() ).append( ":=" ).append( entry.getValue() ).append("<BR>\r\n");
+				}
 				
+				sb.append( "Body received: ").append( buffer.length() ).append( "<BR>\r\n" );
+
+				byte [] data = buffer.getBytes( 5 , buffer.length() );
+				sb.append( "Data:" ).append( buffer.getByte(0) ).append( " ")
+					.append( buffer.getUnsignedInt(1)) .append(" ")
+					.append( data.length ).append( "<BR>\r\n" )
+					.append( buffer.toString());
+				
+				System.out.println( sb.toString() );
 				vertx.close();
 			});
 		});
